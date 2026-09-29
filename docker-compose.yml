@@ -1,0 +1,14 @@
+services:
+  keycloak:
+      image: quay.io/keycloak/keycloak:legacy
+      container_name: example-keycloak
+      command:
+        - "-Dkeycloak.import=/tmp/import/example.json"
+      volumes:
+         - ./keycloak/realms/import:/tmp/import
+      environment:
+        DB_VENDOR: H2
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: admin
+      ports:
+        - "8090:8080"

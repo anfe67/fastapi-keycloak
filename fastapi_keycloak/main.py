@@ -12,7 +12,8 @@ except ImportError:
 
 def app_maker():
     settings = get_settings()
-    app = FastAPI(title="EXAMPLE")
+    app = FastAPI(title="Integration with Keycloak",
+                  description="Integration example with a Keycloak instance" )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_allow_origins,

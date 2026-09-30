@@ -29,7 +29,7 @@ async def user_endpoint(user: User = Depends(guard_users)) -> dict:
 
 
 @router.get("/me/roles", response_model=list[str])
-async def get_auth_check(
+async def get_user_roles(
     current_user: User = Depends(guard_users),
 ) -> dict:
     return current_user.roles[context]

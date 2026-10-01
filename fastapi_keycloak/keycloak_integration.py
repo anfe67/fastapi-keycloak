@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from jose.constants import ALGORITHMS
 from loguru import logger
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from urllib.parse import urlparse
 
@@ -81,7 +81,7 @@ class KeyCloakClient:
     def __init__(self):
         self.settings = KeyCloakSettings()
         self.ttl = self.settings.ttl
-        self.last_fetch: int = -1
+        self.last_fetch: float = -1
         self._public_key: str = ""
 
     @property

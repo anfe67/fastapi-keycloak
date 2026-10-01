@@ -13,8 +13,8 @@ from pydantic import BaseModel, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from urllib.parse import urlparse
 
-logger.disable("cobra_keycloak")
-
+# Normally we don't use it at this level but it can be useful during debug
+# logger.disable("keycloak_fastapi")
 
 class KeyCloakSettings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -183,7 +183,7 @@ def access_guard(context: str, roles: List[str]):
         ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Could not validate credentials",
+                detail="This user does not the appropriate roles in this system",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return user

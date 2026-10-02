@@ -160,6 +160,9 @@ To customize:
 - `httpx` - HTTP client for testing
 - `pytest-mock` - Mocking support
 
+### API Testing 
+I've used [Bruno](https://www.usebruno.com/) for API testing, it is a serious competitor to [Postman](https://www.postman.com/).  
+
 ## License
 
 Add your license information here.

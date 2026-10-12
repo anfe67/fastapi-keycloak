@@ -1,9 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
-from fastapi_keycloak.main import app_maker
 from fastapi_keycloak.keycloak_integration import User
+from fastapi_keycloak.main import app_maker
 
 
 @pytest.fixture
@@ -20,6 +19,7 @@ def client_with_auth(mock_user):
         return mock_user
 
     from fastapi_keycloak.keycloak_integration import get_current_user
+
     app.dependency_overrides[get_current_user] = override_get_current_user
 
     yield TestClient(app)
@@ -35,7 +35,7 @@ def mock_user():
         given_name="User",
         name="Test User",
         scope=["openid profile email"],
-        roles={"umm": {"roles": ["user"]}}
+        roles={"umm": {"roles": ["user"]}},
     )
 
 
@@ -47,7 +47,7 @@ def mock_admin_user():
         given_name="User",
         name="Admin User",
         scope=["openid profile email"],
-        roles={"umm": {"roles": ["user", "admin"]}}
+        roles={"umm": {"roles": ["user", "admin"]}},
     )
 
 
@@ -93,6 +93,7 @@ def test_me_roles_endpoint_admin(client_with_auth, mock_admin_user):
         return mock_admin_user
 
     from fastapi_keycloak.keycloak_integration import get_current_user
+
     app.dependency_overrides[get_current_user] = override_get_current_user
 
     test_client = TestClient(app)

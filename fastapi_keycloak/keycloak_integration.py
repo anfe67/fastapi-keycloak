@@ -1,32 +1,30 @@
 import time
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Dict
+from urllib.parse import urlparse
 
 import requests
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from jose.constants import ALGORITHMS
 from loguru import logger
 from pydantic import BaseModel, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from urllib.parse import urlparse
 
 # Normally we don't use it at this level but it can be useful during debug
 # logger.disable("keycloak_fastapi")
 
+
 class KeyCloakSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="keycloak_",
-        env_file=Path(__file__).parent.parent / ".env",
-        extra="ignore"
+        env_prefix="keycloak_", env_file=Path(__file__).parent.parent / ".env", extra="ignore"
     )
 
     base_url: str = ""
     realm: str = ""
     ttl: int = 60
-    algorithms: List[str] = ["HS256", "RS256"]
+    algorithms: list[str] = ["HS256", "RS256"]
 
     @property
     def public_endpoint(self):
@@ -52,8 +50,8 @@ class User(BaseModel):
     family_name: str
     given_name: str
     name: str
-    scope: List[str]
-    roles: Dict[str, List[str]]
+    scope: list[str]
+    roles: dict[str, list[str]]
 
     @field_validator("scope", mode="before")
     @classmethod
@@ -74,7 +72,7 @@ class User(BaseModel):
         return v  # pragma: no cover
 
     def has_role(self, context: str, role: str) -> bool:
-        return role in self.roles.get(context, list())
+        return role in self.roles.get(context, [])
 
 
 class KeyCloakClient:
@@ -93,15 +91,11 @@ class KeyCloakClient:
             self._public_key = self._get_keycloak_public_key()
             self.last_fetch = time.perf_counter()
 
-        return (
-            f"-----BEGIN PUBLIC KEY-----\n"
-            f"{self._public_key}\n"
-            f"-----END PUBLIC KEY-----"
-        )
+        return f"-----BEGIN PUBLIC KEY-----\n" f"{self._public_key}\n" f"-----END PUBLIC KEY-----"
 
     def _get_keycloak_public_key(self):  # pragma: no cover
         try:
-            realm_info = requests.get(self.settings.public_endpoint).json()
+            realm_info = requests.get(self.settings.public_endpoint, timeout=10).json()
             if not realm_info.get("public_key"):
                 raise ValueError("missing public key")
 
@@ -113,10 +107,10 @@ class KeyCloakClient:
                 f"information from {self.settings.public_endpoint}: {exc}"
             )
             logger.error(msg)
-            raise RuntimeError(msg)
+            raise RuntimeError(msg) from exc
 
 
-@lru_cache()
+@lru_cache
 def get_keycloak_client() -> KeyCloakClient:
     return KeyCloakClient()
 
@@ -124,7 +118,7 @@ def get_keycloak_client() -> KeyCloakClient:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def parse_token(payload: Dict) -> User:
+def parse_token(payload: dict) -> User:
     kwargs = {
         "username": payload["preferred_username"],
         "family_name": payload["family_name"],
@@ -172,14 +166,15 @@ async def get_current_user(
             credentials_exception.detail = "Invalid issuer"
             raise credentials_exception
     except JWTError:
-        raise credentials_exception
+        raise credentials_exception from None
     return user
 
 
-def access_guard(context: str, roles: List[str]):
+def access_guard(context: str, roles: list[str]):
     async def guard(user: User = Depends(get_current_user)):
         if not any(
-            user.has_role(context=context, role=role) for role in roles  # noqa
+            user.has_role(context=context, role=role)
+            for role in roles  # noqa
         ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

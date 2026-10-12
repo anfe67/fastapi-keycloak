@@ -12,8 +12,10 @@ except ImportError:
 
 def app_maker():
     settings = get_settings()
-    app = FastAPI(title="Integration with Keycloak",
-                  description="Integration example with a Keycloak instance" )
+    app = FastAPI(
+        title="Integration with Keycloak",
+        description="Integration example with a Keycloak instance",
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_allow_origins,
@@ -25,6 +27,7 @@ def app_maker():
     app.include_router(router)
     return app
 
+
 if __name__ == "__main__":
     app = app_maker()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # nosec B104

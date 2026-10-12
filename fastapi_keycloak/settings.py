@@ -1,14 +1,12 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import ConfigDict
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="example_app_",
-        env_file=Path(__file__).parent.parent / ".env",
-        extra="ignore"
+        env_prefix="example_app_", env_file=Path(__file__).parent.parent / ".env", extra="ignore"
     )
 
     debug: bool = False
@@ -23,6 +21,7 @@ class Settings(BaseSettings):
     ]
     context: str = "umm"
 
-@lru_cache()
+
+@lru_cache
 def get_settings():
     return Settings()

@@ -1,13 +1,12 @@
-import arrow
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 try:
     from .keycloak_integration import User, access_guard
-    from .settings import get_settings
+    from .settings import get_settings  # noqa: F401
 except ImportError:
     from keycloak_integration import User, access_guard
-    from settings import get_settings
+    from settings import get_settings  # noqa: F401
 
 context = get_settings().context
 guard_users = access_guard(context=context, roles=["user"])
@@ -15,13 +14,13 @@ router = APIRouter()
 
 
 class CreateProcessSchema(BaseModel):
-    business_date: str = Field(
-        ..., description="Date for which to run the process."
-    )
+    business_date: str = Field(..., description="Date for which to run the process.")
+
 
 @router.get("/public")
 async def get_public() -> dict:
     return {"message": "Anyone can see this"}
+
 
 @router.get("/user")
 async def user_endpoint(user: User = Depends(guard_users)) -> dict:

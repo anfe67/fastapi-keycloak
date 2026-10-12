@@ -60,7 +60,7 @@ def test_public_endpoint(client):
 
 def test_public_endpoint_cors(client):
     """Test that /public endpoint has proper CORS headers"""
-    response = client.get("/public", headers={"Origin": "http://localhost:5174"})
+    response = client.get("/public", headers={"Origin": "http://localhost:5173"})
     assert response.status_code == 200
     assert "access-control-allow-origin" in response.headers
 
